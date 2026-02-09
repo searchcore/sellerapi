@@ -11,8 +11,6 @@ services:
       - CONFIG_PATH=${CONFIG_PATH:-/project/config/config.toml}
     depends_on:
       - postgres
-    ports:
-      - "8000:8000"
     logging:
       options:
         max-size: "500m"
@@ -49,3 +47,17 @@ services:
     logging:
       options:
         max-size: "5m"
+
+  nginx:
+      image: nginx:1.29-alpine
+      container_name: api.nginx
+      restart: always
+      ports:
+        - "80:80"
+      volumes:
+        - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      depends_on:
+        - app
+      logging:
+        options:
+          max-size: "100m"
