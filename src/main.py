@@ -14,8 +14,20 @@ from src.infrastructure.setup import setup_infrastructure, setup_mediator
 logger = logging.getLogger(__name__)
 
 
+description = """
+Seller API helps you buy digital goods
+
+## Customer
+
+As customer you can:
+* Purchase products by **purchase tokens**
+> Purchase token is a *unique key* with main purpose to *buy products* without user authentification.
+Each purchase token has **it's own buy limit**, which **can be increased** by administration.
+"""
+
 app = FastAPI(
     title=config.PROJECT_NAME,
+    description=description,
     debug=config.DEBUG,
 )
 
