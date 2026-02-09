@@ -1,6 +1,9 @@
-from fastapi import APIRouter, Depends, Query
-from src.core.responses import SuccessResponse, success
+from fastapi import APIRouter, Depends, Query, status
+from src.core.responses import SuccessResponse, success, create_error_resp
 from src.api.deps import get_purchase_token_ctx, get_mediator
+
+from src.application.common.exceptions import PurchaseTokenNotFound, ProductOutOfStock
+from src.application.customer_buys_products.exceptions import TokenLimitExceeded
 from src.application.common.mediator import Mediator
 from src.application.customer_buys_products.commands.use_purchase_token import UsePurchaseTokenCMD
 from src.infrastructure.implementations.common.purchase_token_provider import ScopedPurchaseToken
@@ -26,7 +29,21 @@ def include_fields(fields: list[str], data: dict[Any, Any]):
 
 @router.post(
     "/products/purchase/token",
-    response_model=SuccessResponse[PurchaseProductsResponse]
+    response_model=SuccessResponse[PurchaseProductsResponse],
+    responses={
+        status.HTTP_200_OK: {
+            "model": SuccessResponse[PurchaseProductsResponse],
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "model": create_error_resp(TokenLimitExceeded)
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": create_error_resp(PurchaseTokenNotFound)
+        },
+        status.HTTP_409_CONFLICT: {
+            "model": create_error_resp(ProductOutOfStock)
+        },
+    }
 )
 async def purchase_products(
     type: int,
