@@ -9,6 +9,7 @@ class Config:
     API_V1_PREFIX: str = "/api/v1"
 
     DEBUG: bool = False
+    ADMIN_DOCS: bool = False
 
 
 @dataclass(frozen=True)
