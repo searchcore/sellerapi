@@ -1,0 +1,51 @@
+services:
+  app:
+    container_name: api.app
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+    restart: unless-stopped
+    volumes:
+      - ./config:/project/config:ro
+    environment:
+      - CONFIG_PATH=${CONFIG_PATH:-/project/config/config.toml}
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+    logging:
+      options:
+        max-size: "500m"
+
+  postgres:
+    container_name: api.postgres
+    image: postgres:14.8-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_DB: $POSTGRES_DB
+      PGDATA: /var/lib/postgresql/data/pgdata
+      TZ: "UTC"
+    volumes:
+      - ./data/postgresql/data:/var/lib/postgresql/data/pgdata
+    logging:
+      options:
+        max-size: "5m"
+
+  postgres_migration:
+    container_name: api.postgres_migration
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+    restart: on-failure
+    depends_on:
+      - postgres
+    volumes:
+      - ./config:/app/config:ro
+    environment:
+      - CONFIG_PATH=${CONFIG_PATH:-./config/config.toml}
+    command: ["python", "-m", "alembic", "upgrade", "head"]
+    logging:
+      options:
+        max-size: "5m"

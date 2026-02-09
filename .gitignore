@@ -1,0 +1,7 @@
+.venv
+.pytest_cache
+config/config.toml
+config/.env
+config/.env.ps1
+__pycache__
+data

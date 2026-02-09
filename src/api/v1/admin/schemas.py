@@ -1,0 +1,44 @@
+from datetime import datetime
+from pydantic import BaseModel
+from typing import Any
+
+
+class CreatePurchaseTokenRequest(BaseModel):
+    expires_at: datetime
+    available_to_buy: int
+
+
+class AddProductsWithoutValidationRequest(BaseModel):
+    product_type: int
+    products: list[dict[str, Any]]
+
+
+class AddProductsWithValidationRequest(BaseModel):
+    product_type: int
+    products: list[dict[str, Any]]
+
+
+class ValidationExecutionErrorResponse(BaseModel):
+    message: str
+    params: dict[str, Any]
+
+
+class ValidationErrorResponse(BaseModel):
+    message: str
+    params: dict[str, Any]
+
+
+class ValidationReportResponse(BaseModel):
+    id: int
+    violations: list[ValidationErrorResponse]
+    execution_error: ValidationExecutionErrorResponse | None
+
+
+class AddedProductsValidatedResponse(BaseModel):
+    added: int
+    invalid: list[ValidationReportResponse]
+
+
+class CreatedTokenResponse(BaseModel):
+    token_id: int
+    secret_token: str
