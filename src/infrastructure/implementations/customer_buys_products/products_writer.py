@@ -1,7 +1,8 @@
 from src.application.customer_buys_products.interfaces import IProductsWriter
 
+from typing import Any
+
 from operator import attrgetter
-from datetime import datetime
 
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,20 +16,10 @@ class ProductsWriter(IProductsWriter):
     def __init__(self, session: AsyncSession):
         self._session = session
 
-    async def set_reserved(self, products: list[ProductDTO], until: datetime):
+    async def set_content(self, products: list[ProductDTO], content: dict[str, Any]):
         stmt = (
             update(ProductModel)
-            .values(reserved_until=until)
-            .where(
-                ProductModel.id.in_(map(attrgetter('id'), products))
-            )
-        )
-        await self._session.execute(stmt)
-
-    async def set_valid(self, products: list[ProductDTO], valid: bool):
-        stmt = (
-            update(ProductModel)
-            .values(valid=valid)
+            .values(content=content)
             .where(
                 ProductModel.id.in_(map(attrgetter('id'), products))
             )

@@ -1,5 +1,5 @@
 from src.application.common.request import Request, RequestHandler
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import logging
 
 from src.application.common.exceptions import ProductOutOfStock
@@ -7,7 +7,7 @@ from src.application.common.mediator import MR
 from src.application.common.interfaces import IUoW, IPurchaseTokenProvider
 
 from src.application.customer_buys_products.exceptions import TokenLimitExceeded
-from src.application.customer_buys_products.interfaces import IProductsReader, IPurchasesWriter, ITokenWriter, ITokenReader
+from src.application.customer_buys_products.interfaces import IProductsReader, IPurchasesWriter, ITokenWriter, ITokenReader, IProductsWriter
 
 from src.application.common.dtos import NewPurchaseDTO, ProductDTO
 
@@ -16,6 +16,7 @@ from src.application.common.dtos import NewPurchaseDTO, ProductDTO
 class UsePurchaseTokenCMD(Request[list[ProductDTO]]):
     product_type: int
     amount: int
+    clear_content: bool = field(default=False)
 
 
 @MR.register(UsePurchaseTokenCMD)
@@ -28,6 +29,7 @@ class UsePurchaseTokenCMDHandler(RequestHandler[UsePurchaseTokenCMD, list[Produc
         purchases_writer: IPurchasesWriter, 
         token_writer: ITokenWriter,
         token_reader: ITokenReader,
+        products_writer: IProductsWriter,
     ):
         self._uow = uow
         self._products_reader = products_reader
@@ -35,6 +37,7 @@ class UsePurchaseTokenCMDHandler(RequestHandler[UsePurchaseTokenCMD, list[Produc
         self._purchases_writer = purchases_writer
         self._token_writer = token_writer
         self._token_reader = token_reader
+        self._products_writer = products_writer
 
     async def __call__(self, cmd: UsePurchaseTokenCMD) -> list[ProductDTO]:
         token = self._purchase_token_provider.get_token()
@@ -63,6 +66,9 @@ class UsePurchaseTokenCMDHandler(RequestHandler[UsePurchaseTokenCMD, list[Produc
         await self._purchases_writer.add_purchases([NewPurchaseDTO(token.id, p.id) for p in products])
         await self._token_writer.add_to_used_count(token.id, len(products))
         await self._token_writer.sub_available_to_buy(token.id, len(products))
+
+        if cmd.clear_content:
+            await self._products_writer.set_content(products, {})
 
         await self._uow.commit()
     

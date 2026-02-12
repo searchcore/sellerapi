@@ -11,6 +11,7 @@ from tests.unit.fake_adapters.customer_buys_products.purchases_writer import Fak
 from tests.unit.fake_adapters.customer_buys_products.token_reader import FakeTokenReader
 from tests.unit.fake_adapters.customer_buys_products.token_writer import FakeTokenWriter
 from tests.unit.fake_adapters.customer_buys_products.purchase_token_provider import FakePurchaseTokenProvider
+from tests.unit.fake_adapters.customer_buys_products.products_writer import FakeProductsWriter
 
 from src.application.common.dtos import PurchaseTokenDTO
 from src.application.common.dtos import ProductDTO
@@ -27,6 +28,7 @@ async def test_use_purchase_token_once_success(
     purchases_writer: FakePurchasesWriter,
     token_writer: FakeTokenWriter,
     token_reader: FakeTokenReader,
+    products_writer: FakeProductsWriter,
 ):
     TOKEN = PurchaseTokenDTO(1337, "abc")
     TOKEN_DATA = PurchaseTokenDataDTO(1337, "abc", datetime.now(), True, 100, 0)
@@ -42,8 +44,9 @@ async def test_use_purchase_token_once_success(
         purchases_writer,
         token_writer,
         token_reader,
+        products_writer,
     )
-    cmd = UsePurchaseTokenCMD(111, 1)
+    cmd = UsePurchaseTokenCMD(111, 1, clear_content=True)
 
     products = await handler(cmd)
 
@@ -53,6 +56,8 @@ async def test_use_purchase_token_once_success(
     assert len(purchases_writer.purchases) == 1
     assert purchases_writer.purchases[0].product_id == 1
     assert purchases_writer.purchases[0].token_id == 1337
+
+    assert products_writer.products[0].content == {}
 
     assert uow.commited == True
     assert uow.rolled_back == False
@@ -65,6 +70,7 @@ async def test_use_purchase_token_once_out_of_stock(
     purchases_writer: FakePurchasesWriter,
     token_writer: FakeTokenWriter,
     token_reader: FakeTokenReader,
+    products_writer: FakeProductsWriter,
 ):
     TOKEN = PurchaseTokenDTO(1337, "abc")
     TOKEN_DATA = PurchaseTokenDataDTO(1337, "abc", datetime.now(), True, 100, 0)
@@ -80,6 +86,7 @@ async def test_use_purchase_token_once_out_of_stock(
         purchases_writer,
         token_writer,
         token_reader,
+        products_writer,
     )
     cmd = UsePurchaseTokenCMD(111, 2)
 
@@ -99,6 +106,7 @@ async def test_use_purchase_token_token_limit(
     purchases_writer: FakePurchasesWriter,
     token_writer: FakeTokenWriter,
     token_reader: FakeTokenReader,
+    products_writer: FakeProductsWriter,
 ):
     TOKEN = PurchaseTokenDTO(1337, "abc")
     TOKEN_DATA = PurchaseTokenDataDTO(1337, "abc", datetime.now(), True, 100, 0)
@@ -114,6 +122,7 @@ async def test_use_purchase_token_token_limit(
         purchases_writer,
         token_writer,
         token_reader,
+        products_writer,
     )
     cmd = UsePurchaseTokenCMD(111, 101)
 
