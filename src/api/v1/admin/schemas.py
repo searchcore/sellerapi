@@ -18,6 +18,11 @@ class AddProductsWithValidationRequest(BaseModel):
     products: list[dict[str, Any]]
 
 
+class AddProductTypeRequest(BaseModel):
+    name: str
+    schema: dict[str, Any]
+
+
 class ValidationExecutionErrorResponse(BaseModel):
     message: str
     params: dict[str, Any]
@@ -42,3 +47,7 @@ class AddedProductsValidatedResponse(BaseModel):
 class CreatedTokenResponse(BaseModel):
     token_id: int
     secret_token: str
+
+
+class CreatedProductTypeResponse(BaseModel):
+    product_type_id: int

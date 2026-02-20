@@ -12,6 +12,8 @@ from .schemas import (
     CreatePurchaseTokenRequest,
     CreatedTokenResponse,
     AddedProductsValidatedResponse,
+    AddProductTypeRequest,
+    CreatedProductTypeResponse,
 )
 from .mappers import (
     dto_to_resp_added_products_validated,
@@ -20,6 +22,8 @@ from .mappers import (
     req_to_cmd_increase_available_to_buy,
     req_to_cmd_add_prod_without_validation,
     req_to_cmd_add_prod_with_validation,
+    req_to_cmd_add_prod_type,
+    vo_to_resp_created_prod_type,
 )
 
 router = APIRouter()
@@ -85,4 +89,21 @@ async def import_products_with_validation(
 
     return success(
         dto_to_resp_added_products_validated(result)
+    )
+
+
+@router.post(
+    "/products/type",
+    response_model=SuccessResponse[CreatedProductTypeResponse],
+)
+async def create_product_type(
+    body: AddProductTypeRequest,
+    mediator: Mediator = Depends(get_mediator),
+    token: AccessTokenBriefDTO = Depends(get_access_token),
+):
+    cmd = req_to_cmd_add_prod_type(body)
+    result = await mediator.send(cmd)
+
+    return success(
+        vo_to_resp_created_prod_type(result)
     )

@@ -9,6 +9,9 @@ class ErrorCodes(StrEnum):
     PURCHASE_TOKEN_NOT_FOUND = "purchase_token_not_found"
     PRODUCT_OUT_OF_STOCK = "product_out_of_stock"
     TOKEN_LIMIT_EXCEEDED = "token_limit_exceeded"
+    PRODUCT_TYPE_SCHEMA_INVALID = "product_type_schema_invalid"
+    PRODUCT_TYPE_SCHEMA_NOT_FOUND = "product_type_schema_not_found"
+    PRODUCT_TYPE_NOT_FOUND = "product_type_not_found"
 
 
 @dataclass(eq=False)

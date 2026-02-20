@@ -19,3 +19,7 @@ class ProductTypeSchemaInvalid(ApplicationLayerException):
 
 class ProductTypeSchemaNotFound(ApplicationLayerException):
     code = ErrorCodes.PRODUCT_TYPE_SCHEMA_NOT_FOUND
+
+
+class ProductTypeNotFound(ApplicationLayerException):
+    code = ErrorCodes.PRODUCT_TYPE_NOT_FOUND

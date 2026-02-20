@@ -7,10 +7,10 @@ from src.application.common.dtos import NewProductDTO
 from src.application.common.mediator import MR
 from src.application.common.interfaces import IUoW, ISchemaValidator
 from src.application.common.interfaces.schema_validator import ContentValidationReport
-from src.application.common.exceptions import ProductTypeSchemaNotFound
+from src.application.common.exceptions import ProductTypeSchemaNotFound, ProductTypeNotFound
 
 from src.application.admin_manages_products.dtos import AddProductsResultDTO
-from src.application.admin_manages_products.interfaces import IProductsWriter, ISchemaReader
+from src.application.admin_manages_products.interfaces import IProductsWriter, ISchemaReader, IProductsReader
 
 
 logger = logging.getLogger(__name__)
@@ -25,13 +25,24 @@ class AddProductsWithValidationCMD(Request[AddProductsResultDTO]):
 
 @MR.register(AddProductsWithValidationCMD)
 class AddProductsWithValidationCMDHandler(RequestHandler[AddProductsWithValidationCMD, AddProductsResultDTO]):
-    def __init__(self, uow: IUoW, products_writer: IProductsWriter, schema_validator: ISchemaValidator, schema_reader: ISchemaReader):
+    def __init__(
+        self,
+        uow: IUoW,
+        products_writer: IProductsWriter,
+        schema_validator: ISchemaValidator,
+        schema_reader: ISchemaReader,
+        products_reader: IProductsReader,
+    ):
         self._uow = uow
         self._products_writer = products_writer
+        self._products_reader = products_reader
         self._schema_validator = schema_validator
         self._schema_reader = schema_reader
 
     async def __call__(self, cmd: AddProductsWithValidationCMD) -> AddProductsResultDTO:
+        if not await self._products_reader.does_product_type_exist(cmd.product_type):
+            raise ProductTypeNotFound(f"Product type {cmd.product_type.value} does not exist.")
+
         if cmd.schema_version is not None:
             product_type_schema = await self._schema_reader.get_schema_for_product_type_and_version(cmd.product_type, cmd.schema_version)
 

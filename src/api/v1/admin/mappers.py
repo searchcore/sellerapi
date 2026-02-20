@@ -1,5 +1,10 @@
 from src.application.admin_manages_purchase_tokens.commands import CreatePurchaseTokenCMD, IncreaseAvailableToBuyCMD
-from src.application.admin_manages_products.commands import AddProductsWithoutValidationCMD, AddProductsWithValidationCMD
+from src.application.admin_manages_products.commands import AddProductsWithoutValidationCMD, AddProductsWithValidationCMD, AddProductTypeCMD
+
+from src.domain.common.value_objects import (
+    ProductTypeIDVO,
+    ProductTypeSchemaVO,
+)
 
 from src.application.common.dtos import NewProductDTO
 from src.application.admin_manages_purchase_tokens.dtos import CreatedTokenDTO
@@ -14,6 +19,8 @@ from .schemas import (
     ValidationReportResponse,
     ValidationExecutionErrorResponse,
     ValidationErrorResponse,
+    AddProductTypeRequest,
+    CreatedProductTypeResponse,
 )
 
 
@@ -26,15 +33,15 @@ def dto_to_resp_added_products_validated(dto: AddProductsResultDTO) -> AddedProd
         added=dto.added_products_amount,
         invalid=[
             ValidationReportResponse(
-                id=report.product_id,
+                id=product_id,
                 violations=[ValidationErrorResponse(message=e.details, params=e.params) for e in report.violations],
                 execution_error=ValidationExecutionErrorResponse(
                     message=report.execution_error.details,
                     params=report.execution_error.params
                 ) if report.execution_error else None
             )
-            for report
-            in dto.not_added_products
+            for product_id, report
+            in enumerate(dto.not_added_products)
         ]
     )
 
@@ -62,7 +69,7 @@ def req_to_cmd_add_prod_without_validation(req: AddProductsWithoutValidationRequ
 
 def req_to_cmd_add_prod_with_validation(req: AddProductsWithValidationRequest) -> AddProductsWithValidationCMD:
     return AddProductsWithValidationCMD(
-        product_type=req.product_type,
+        product_type=ProductTypeIDVO(req.product_type),
         products=[
             NewProductDTO(
                 req.product_type,
@@ -72,3 +79,14 @@ def req_to_cmd_add_prod_with_validation(req: AddProductsWithValidationRequest) -
             in req.products
         ]
     )
+
+
+def req_to_cmd_add_prod_type(req: AddProductTypeRequest) -> AddProductTypeCMD:
+    return AddProductTypeCMD(
+        name=req.name,
+        schema=ProductTypeSchemaVO(req.schema)
+    )
+
+
+def vo_to_resp_created_prod_type(vo: ProductTypeIDVO) -> CreatedProductTypeResponse:
+    return CreatedProductTypeResponse(product_type_id=vo.value)
