@@ -47,7 +47,7 @@ def dto_to_resp_added_products_validated(dto: AddProductsResultDTO) -> AddedProd
 
 
 def req_to_cmd_create_purchase_token(req: CreatePurchaseTokenRequest) -> CreatePurchaseTokenCMD:
-    return CreatePurchaseTokenCMD(req.expires_at, req.available_to_buy)
+    return CreatePurchaseTokenCMD(ProductTypeIDVO(req.product_type), req.expires_at, req.available_to_buy)
 
 
 def req_to_cmd_increase_available_to_buy(token_id: int, amount: int) -> IncreaseAvailableToBuyCMD:

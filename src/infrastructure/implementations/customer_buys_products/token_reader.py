@@ -6,6 +6,8 @@ from src.db.models import PurchaseTokenModel
 from src.application.common.exceptions import PurchaseTokenNotFound
 from src.application.common.dtos.purchase_token_data import PurchaseTokenDataDTO
 
+from src.domain.common.value_objects import ProductTypeIDVO
+
 
 class TokenReader(ITokenReader):
     def __init__(self, session: AsyncSession):
@@ -19,6 +21,7 @@ class TokenReader(ITokenReader):
     
         return PurchaseTokenDataDTO(
             model.id,
+            ProductTypeIDVO(model.product_type),
             model.token,
             model.expires_at,
             model.is_active,

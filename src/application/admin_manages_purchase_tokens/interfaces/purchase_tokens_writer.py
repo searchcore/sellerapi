@@ -2,10 +2,12 @@ from abc import ABC, abstractmethod
 
 from datetime import datetime
 
+from src.domain.common.value_objects import ProductTypeIDVO
+
 
 class IPurchaseTokensWriter(ABC):
     @abstractmethod
-    async def add_token(self, token: str, expires_at: datetime, available_to_buy: int) -> int:
+    async def add_token(self, product_type: ProductTypeIDVO, token: str, expires_at: datetime, available_to_buy: int) -> int:
         ...
 
     @abstractmethod

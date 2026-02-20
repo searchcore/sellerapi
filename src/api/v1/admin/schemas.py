@@ -4,6 +4,7 @@ from typing import Any
 
 
 class CreatePurchaseTokenRequest(BaseModel):
+    product_type: int
     expires_at: datetime
     available_to_buy: int
 

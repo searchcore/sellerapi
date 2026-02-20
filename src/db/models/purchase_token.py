@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import (
-    Integer, DateTime, String, BOOLEAN
+    Integer, DateTime, String, BOOLEAN, ForeignKey
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -13,6 +13,7 @@ class PurchaseTokenModel(TimedBaseModel):
     __mapper_args__ = {"eager_defaults": True}
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    product_type: Mapped[int] = mapped_column(ForeignKey("product_types.id"), nullable=False)
     token: Mapped[str] = mapped_column(String, unique=True, nullable=False, index=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     available_to_buy: Mapped[int] = mapped_column(Integer, nullable=False)

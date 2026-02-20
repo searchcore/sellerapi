@@ -14,7 +14,6 @@ from src.application.common.dtos import NewPurchaseDTO, ProductDTO
 
 @dataclass(frozen=True)
 class UsePurchaseTokenCMD(Request[list[ProductDTO]]):
-    product_type: int
     amount: int
     clear_content: bool = field(default=False)
 
@@ -53,7 +52,7 @@ class UsePurchaseTokenCMDHandler(RequestHandler[UsePurchaseTokenCMD, list[Produc
                 }
             )
 
-        products = await self._products_reader.get_unsold_unreserved_products(cmd.product_type, cmd.amount)
+        products = await self._products_reader.get_unsold_unreserved_products(token_data.product_type.value, cmd.amount)
 
         if len(products) != cmd.amount:
             raise ProductOutOfStock(

@@ -46,14 +46,13 @@ def include_fields(fields: list[str], data: dict[Any, Any]):
     }
 )
 async def purchase_products(
-    type: int,
     fields: Annotated[list[str] | None, Query()] = None,
     amount: Annotated[int, Query(title="Amount of products to purchase", ge=1, le=500)] = 1,
     clear_content: Annotated[bool, Query()] = False,
     purchase_token: PurchaseTokenDTO = Depends(get_purchase_token_ctx),
     mediator: Mediator = Depends(get_mediator),
 ):
-    cmd = UsePurchaseTokenCMD(type, amount, clear_content=clear_content)
+    cmd = UsePurchaseTokenCMD(amount, clear_content=clear_content)
     products = await mediator.send(cmd, context={ScopedPurchaseToken: purchase_token})
 
     resp = dto_to_resp_purchase_products(products)
