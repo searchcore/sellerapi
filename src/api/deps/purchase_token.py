@@ -1,3 +1,4 @@
+import hashlib
 from fastapi import status, Header, Query
 from dishka.integrations.fastapi import (
     FromDishka,
@@ -12,6 +13,10 @@ from src.application.common.dtos import PurchaseTokenDTO
 from src.infrastructure.adapters.purchase_token_reader import (
     PurchaseTokenReader,
 )
+
+
+def hash_token(token_raw: str) -> str:
+    return hashlib.sha256(token_raw.encode()).hexdigest()
 
 
 @inject
@@ -29,7 +34,8 @@ async def get_purchase_token_ctx(
     purchase_token = purchase_token or x_purchase_token
 
     reader = PurchaseTokenReader(session)
-    token_obj = await reader.get(purchase_token)
+    token_hash = hash_token(purchase_token)
+    token_obj = await reader.get(token_hash)
 
     if token_obj is None:
         raise PurchaseTokenInvalid(

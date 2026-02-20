@@ -22,7 +22,6 @@ class TokenReader(ITokenReader):
         return PurchaseTokenDataDTO(
             model.id,
             ProductTypeIDVO(model.product_type),
-            model.token,
             model.expires_at,
             model.is_active,
             model.available_to_buy,

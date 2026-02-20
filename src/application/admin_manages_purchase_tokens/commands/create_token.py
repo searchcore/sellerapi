@@ -2,6 +2,7 @@ from src.application.common.request import Request, RequestHandler
 from dataclasses import dataclass
 from datetime import datetime
 import secrets
+import hashlib
 import logging
 
 from src.domain.common.value_objects import ProductTypeIDVO
@@ -30,8 +31,9 @@ class CreatePurchaseTokenCMDHandler(RequestHandler[CreatePurchaseTokenCMD, Creat
 
     async def __call__(self, cmd: CreatePurchaseTokenCMD) -> CreatedTokenDTO:
         token = secrets.token_urlsafe(32)
+        token_hash = hash_token(token)
 
-        token_id = await self._purchase_tokens_writer.add_token(cmd.product_type, token, cmd.expires_at, cmd.available_to_buy)
+        token_id = await self._purchase_tokens_writer.add_token(cmd.product_type, token_hash, cmd.expires_at, cmd.available_to_buy)
 
         await self._uow.commit()
 
@@ -46,3 +48,7 @@ class CreatePurchaseTokenCMDHandler(RequestHandler[CreatePurchaseTokenCMD, Creat
         )
 
         return CreatedTokenDTO(token_id, token)
+
+
+def hash_token(token_raw: str) -> str:
+    return hashlib.sha256(token_raw.encode()).hexdigest()

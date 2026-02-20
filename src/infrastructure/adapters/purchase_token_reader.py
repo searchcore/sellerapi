@@ -11,9 +11,9 @@ class PurchaseTokenReader:
     def __init__(self, session: AsyncSession):
         self._session = session
 
-    async def get(self, token: str) -> PurchaseTokenDTO | None:
+    async def get(self, token_hash: str) -> PurchaseTokenDTO | None:
         stmt = select(PurchaseTokenModel).where(
-            PurchaseTokenModel.token == token
+            PurchaseTokenModel.token_hash == token_hash
         )
         r = await self._session.execute(stmt)
         m = r.scalar()
@@ -21,4 +21,4 @@ class PurchaseTokenReader:
         if m is None:
             return None
 
-        return PurchaseTokenDTO(m.id, m.token)
+        return PurchaseTokenDTO(m.id)

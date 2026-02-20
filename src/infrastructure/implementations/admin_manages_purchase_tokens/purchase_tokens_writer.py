@@ -12,10 +12,10 @@ class PurchaseTokensWriter(IPurchaseTokensWriter):
     def __init__(self, session: AsyncSession):
         self._session = session
 
-    async def add_token(self, product_type: ProductTypeIDVO, token: str, expires_at: datetime, available_to_buy: int) -> int:
+    async def add_token(self, product_type: ProductTypeIDVO, token_hash: str, expires_at: datetime, available_to_buy: int) -> int:
         m = PurchaseTokenModel(
             product_type=product_type.value,
-            token=token,
+            token_hash=token_hash,
             expires_at=expires_at,
             available_to_buy=available_to_buy,
         )
