@@ -20,7 +20,7 @@ class AddProductsWithValidationRequest(BaseModel):
 
 class AddProductTypeRequest(BaseModel):
     name: str
-    schema: dict[str, Any]
+    content_schema: dict[str, Any]
 
 
 class ValidationExecutionErrorResponse(BaseModel):

@@ -84,7 +84,7 @@ def req_to_cmd_add_prod_with_validation(req: AddProductsWithValidationRequest) -
 def req_to_cmd_add_prod_type(req: AddProductTypeRequest) -> AddProductTypeCMD:
     return AddProductTypeCMD(
         name=req.name,
-        schema=ProductTypeSchemaVO(req.schema)
+        schema=ProductTypeSchemaVO(req.content_schema)
     )
 
 
