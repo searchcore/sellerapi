@@ -21,6 +21,7 @@ class ProductsReader(IProductsReader):
                 or_(ProductModel.reserved_until.is_(None), ProductModel.reserved_until < func.now()),
                 ~exists().where(ProductPurchaseModel.product_id == ProductModel.id)
             )
+            .order_by(ProductModel.created_at.desc())
             .with_for_update(skip_locked=True)
             .limit(amount)          
         )
