@@ -6,6 +6,7 @@ from src.application.common.exceptions import PurchaseTokenNotFound, ProductOutO
 from src.application.customer_buys_products.exceptions import TokenLimitExceeded
 from src.application.common.mediator import Mediator
 from src.application.customer_buys_products.commands.use_purchase_token import UsePurchaseTokenCMD
+from src.application.customer_buys_products.queries import GetAvailableProductsCountQR
 from src.infrastructure.implementations.common.purchase_token_provider import ScopedPurchaseToken
 from src.application.common.dtos.purchase_token import PurchaseTokenDTO
 
@@ -14,6 +15,7 @@ from typing import Any, Annotated
 
 from .schemas import (
     PurchaseProductsResponse,
+    AvailableProductsCountResponse,
 )
 from .mappers import (
     dto_to_resp_purchase_products,
@@ -60,3 +62,16 @@ async def purchase_products(
         resp.products = [include_fields(fields, p) for p in resp.products]
 
     return success(resp)
+
+
+@router.get(
+    "/products/purchase/token",
+    response_model=SuccessResponse[AvailableProductsCountResponse],
+)
+async def get_available_products_count(
+    purchase_token: PurchaseTokenDTO = Depends(get_purchase_token_ctx),
+    mediator: Mediator = Depends(get_mediator),
+):
+    cmd = GetAvailableProductsCountQR()
+    count = await mediator.send(cmd, context={ScopedPurchaseToken: purchase_token})
+    return success(AvailableProductsCountResponse(count=count))

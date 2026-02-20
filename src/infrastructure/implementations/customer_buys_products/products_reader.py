@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.models import ProductModel, ProductPurchaseModel
 
+from src.domain.common.value_objects import ProductTypeIDVO
 from src.application.common.dtos import ProductDTO
 
 
@@ -29,3 +30,18 @@ class ProductsReader(IProductsReader):
         result = await self._session.execute(stmt)
 
         return [ProductDTO(row.id, type, row.content) for row in result.all()]
+
+    async def get_unsold_unreserved_products_count(self, type: ProductTypeIDVO) -> int:
+        stmt = (
+            select(func.count(ProductModel.id))
+            .where(
+                ProductModel.type == type.value,
+                ProductModel.valid == True,
+                or_(ProductModel.reserved_until.is_(None), ProductModel.reserved_until < func.now()),
+                ~exists().where(ProductPurchaseModel.product_id == ProductModel.id)
+            )      
+        )
+
+        result = await self._session.scalar(stmt)
+
+        return result or 0

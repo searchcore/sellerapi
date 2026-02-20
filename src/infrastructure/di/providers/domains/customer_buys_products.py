@@ -1,6 +1,7 @@
 from dishka import Provider, Scope
 
 from src.application.customer_buys_products.commands.use_purchase_token import UsePurchaseTokenCMDHandler
+from src.application.customer_buys_products.queries.get_available_products_count import GetAvailableProductsCountQRHandler
 from src.application.customer_buys_products.interfaces import (
     IProductsReader,
     IPurchasesWriter,
@@ -24,3 +25,4 @@ def setup_provider(provider: Provider):
     provider.provide(TokenWriter, scope=Scope.REQUEST, provides=ITokenWriter)
     provider.provide(ProductsWriter, scope=Scope.REQUEST, provides=IProductsWriter)
     provider.provide(UsePurchaseTokenCMDHandler, scope=Scope.REQUEST, provides=UsePurchaseTokenCMDHandler)
+    provider.provide(GetAvailableProductsCountQRHandler, scope=Scope.REQUEST, provides=GetAvailableProductsCountQRHandler)
