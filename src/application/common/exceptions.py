@@ -11,3 +11,7 @@ class PurchaseTokenNotFound(ApplicationLayerException):
 
 class ProductOutOfStock(ApplicationLayerException):
     code = ErrorCodes.PRODUCT_OUT_OF_STOCK
+
+
+class ProductTypeSchemaInvalid(ApplicationLayerException):
+    code = ErrorCodes.PRODUCT_TYPE_SCHEMA_INVALID
