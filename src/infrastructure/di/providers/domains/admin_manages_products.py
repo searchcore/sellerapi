@@ -1,6 +1,6 @@
 from dishka import Provider, Scope
 
-from application.admin_manages_products.commands.import_products import ImportProductsCMDHandler
+from src.application.admin_manages_products.commands.import_products import ImportProductsCMDHandler
 from src.application.admin_manages_products.commands.add_product_type import AddProductTypeCMDHandler
 from src.application.admin_manages_products.interfaces import IProductsWriter, ISchemaWriter, ISchemaReader, IProductsReader
 from src.infrastructure.implementations.admin_manages_products import ProductsWriter, SchemaWriter, SchemaReader, ProductsReader
