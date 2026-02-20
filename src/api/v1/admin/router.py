@@ -7,21 +7,19 @@ from src.application.common.dtos import AccessTokenBriefDTO
 from typing import Annotated
 
 from .schemas import (
-    AddProductsWithValidationRequest,
-    AddProductsWithoutValidationRequest,
+    ImportProductsRequest,
     CreatePurchaseTokenRequest,
     CreatedTokenResponse,
-    AddedProductsValidatedResponse,
+    ImportedProductsResponse,
     AddProductTypeRequest,
     CreatedProductTypeResponse,
 )
 from .mappers import (
-    dto_to_resp_added_products_validated,
+    dto_to_resp_imported_products,
     dto_to_resp_created_token,
     req_to_cmd_create_purchase_token,
     req_to_cmd_increase_available_to_buy,
-    req_to_cmd_add_prod_without_validation,
-    req_to_cmd_add_prod_with_validation,
+    req_to_cmd_import_products,
     req_to_cmd_add_prod_type,
     vo_to_resp_created_prod_type,
 )
@@ -62,33 +60,18 @@ async def increase_available_to_buy(
 
 @router.post(
     "/products/import",
-    response_model=SuccessResponse[EmptyResponse],
+    response_model=SuccessResponse[ImportedProductsResponse],
 )
 async def import_products(
-    body: AddProductsWithoutValidationRequest,
+    body: ImportProductsRequest,
     mediator: Mediator = Depends(get_mediator),
     token: AccessTokenBriefDTO = Depends(get_access_token),
 ):
-    cmd = req_to_cmd_add_prod_without_validation(body)
-    await mediator.send(cmd)
-
-    return success_empty()
-
-
-@router.post(
-    "/products/import/validate",
-    response_model=SuccessResponse[AddedProductsValidatedResponse],
-)
-async def import_products_with_validation(
-    body: AddProductsWithValidationRequest,
-    mediator: Mediator = Depends(get_mediator),
-    token: AccessTokenBriefDTO = Depends(get_access_token),
-):
-    cmd = req_to_cmd_add_prod_with_validation(body)
+    cmd = req_to_cmd_import_products(body)
     result = await mediator.send(cmd)
 
     return success(
-        dto_to_resp_added_products_validated(result)
+        dto_to_resp_imported_products(result)
     )
 
 

@@ -9,7 +9,7 @@ from src.application.common.interfaces import IUoW, ISchemaValidator
 from src.application.common.interfaces.schema_validator import ContentValidationReport
 from src.application.common.exceptions import ProductTypeSchemaNotFound, ProductTypeNotFound
 
-from src.application.admin_manages_products.dtos import AddProductsResultDTO
+from src.application.admin_manages_products.dtos import ImportProductsResultDTO
 from src.application.admin_manages_products.interfaces import IProductsWriter, ISchemaReader, IProductsReader
 
 
@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
-class AddProductsWithValidationCMD(Request[AddProductsResultDTO]):
+class ImportProductsCMD(Request[ImportProductsResultDTO]):
     product_type: ProductTypeIDVO
     products: list[NewProductDTO]
     schema_version: ProductTypeSchemaVersionVO | None = None
 
 
-@MR.register(AddProductsWithValidationCMD)
-class AddProductsWithValidationCMDHandler(RequestHandler[AddProductsWithValidationCMD, AddProductsResultDTO]):
+@MR.register(ImportProductsCMD)
+class ImportProductsCMDHandler(RequestHandler[ImportProductsCMD, ImportProductsResultDTO]):
     def __init__(
         self,
         uow: IUoW,
@@ -39,7 +39,7 @@ class AddProductsWithValidationCMDHandler(RequestHandler[AddProductsWithValidati
         self._schema_validator = schema_validator
         self._schema_reader = schema_reader
 
-    async def __call__(self, cmd: AddProductsWithValidationCMD) -> AddProductsResultDTO:
+    async def __call__(self, cmd: ImportProductsCMD) -> ImportProductsResultDTO:
         if not await self._products_reader.does_product_type_exist(cmd.product_type):
             raise ProductTypeNotFound(f"Product type {cmd.product_type.value} does not exist.")
 
@@ -80,7 +80,7 @@ class AddProductsWithValidationCMDHandler(RequestHandler[AddProductsWithValidati
             }
         )
 
-        return AddProductsResultDTO(
+        return ImportProductsResultDTO(
             len(valid_products),
             [report for report in validation_reports if not report.product_valid]
         )

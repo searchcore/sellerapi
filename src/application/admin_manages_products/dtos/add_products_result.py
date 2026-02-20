@@ -4,6 +4,6 @@ from src.application.common.interfaces.schema_validator import ContentValidation
 
 
 @dataclass(frozen=True)
-class AddProductsResultDTO:
+class ImportProductsResultDTO:
     added_products_amount: int
     not_added_products: list[ContentValidationReport]

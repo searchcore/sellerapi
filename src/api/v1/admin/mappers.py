@@ -1,5 +1,5 @@
 from src.application.admin_manages_purchase_tokens.commands import CreatePurchaseTokenCMD, IncreaseAvailableToBuyCMD
-from src.application.admin_manages_products.commands import AddProductsWithoutValidationCMD, AddProductsWithValidationCMD, AddProductTypeCMD
+from src.application.admin_manages_products.commands import ImportProductsCMD, AddProductTypeCMD
 
 from src.domain.common.value_objects import (
     ProductTypeIDVO,
@@ -8,14 +8,13 @@ from src.domain.common.value_objects import (
 
 from src.application.common.dtos import NewProductDTO
 from src.application.admin_manages_purchase_tokens.dtos import CreatedTokenDTO
-from src.application.admin_manages_products.dtos import AddProductsResultDTO
+from src.application.admin_manages_products.dtos import ImportProductsResultDTO
 
 from .schemas import (
-    AddProductsWithoutValidationRequest,
-    AddProductsWithValidationRequest,
+    ImportProductsRequest,
     CreatePurchaseTokenRequest,
     CreatedTokenResponse,
-    AddedProductsValidatedResponse,
+    ImportedProductsResponse,
     ValidationReportResponse,
     ValidationExecutionErrorResponse,
     ValidationErrorResponse,
@@ -28,8 +27,8 @@ def dto_to_resp_created_token(dto: CreatedTokenDTO) -> CreatedTokenResponse:
     return CreatedTokenResponse(token_id=dto.token_id, secret_token=dto.token)
 
 
-def dto_to_resp_added_products_validated(dto: AddProductsResultDTO) -> AddedProductsValidatedResponse:
-    return AddedProductsValidatedResponse(
+def dto_to_resp_imported_products(dto: ImportProductsResultDTO) -> ImportedProductsResponse:
+    return ImportedProductsResponse(
         added=dto.added_products_amount,
         invalid=[
             ValidationReportResponse(
@@ -54,21 +53,8 @@ def req_to_cmd_increase_available_to_buy(token_id: int, amount: int) -> Increase
     return IncreaseAvailableToBuyCMD(token_id, amount)
 
 
-def req_to_cmd_add_prod_without_validation(req: AddProductsWithoutValidationRequest) -> AddProductsWithoutValidationCMD:
-    return AddProductsWithoutValidationCMD(
-        products=[
-            NewProductDTO(
-                req.product_type,
-                p,
-            )
-            for p
-            in req.products
-        ]
-    )
-
-
-def req_to_cmd_add_prod_with_validation(req: AddProductsWithValidationRequest) -> AddProductsWithValidationCMD:
-    return AddProductsWithValidationCMD(
+def req_to_cmd_import_products(req: ImportProductsRequest) -> ImportProductsCMD:
+    return ImportProductsCMD(
         product_type=ProductTypeIDVO(req.product_type),
         products=[
             NewProductDTO(

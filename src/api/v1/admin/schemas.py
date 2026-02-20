@@ -9,12 +9,7 @@ class CreatePurchaseTokenRequest(BaseModel):
     available_to_buy: int
 
 
-class AddProductsWithoutValidationRequest(BaseModel):
-    product_type: int
-    products: list[dict[str, Any]]
-
-
-class AddProductsWithValidationRequest(BaseModel):
+class ImportProductsRequest(BaseModel):
     product_type: int
     products: list[dict[str, Any]]
 
@@ -40,7 +35,7 @@ class ValidationReportResponse(BaseModel):
     execution_error: ValidationExecutionErrorResponse | None
 
 
-class AddedProductsValidatedResponse(BaseModel):
+class ImportedProductsResponse(BaseModel):
     added: int
     invalid: list[ValidationReportResponse]
 
