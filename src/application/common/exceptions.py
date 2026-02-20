@@ -15,3 +15,7 @@ class ProductOutOfStock(ApplicationLayerException):
 
 class ProductTypeSchemaInvalid(ApplicationLayerException):
     code = ErrorCodes.PRODUCT_TYPE_SCHEMA_INVALID
+
+
+class ProductTypeSchemaNotFound(ApplicationLayerException):
+    code = ErrorCodes.PRODUCT_TYPE_SCHEMA_NOT_FOUND
