@@ -5,6 +5,7 @@ import logging
 from src.application.common.exceptions import ProductOutOfStock
 from src.application.common.mediator import MR
 from src.application.common.interfaces import IUoW, IPurchaseTokenProvider
+from src.application.common.services import FeaturesService
 
 from src.application.customer_buys_products.exceptions import TokenLimitExceeded
 from src.application.customer_buys_products.interfaces import IProductsReader, IPurchasesWriter, ITokenWriter, ITokenReader, IProductsWriter
@@ -15,6 +16,7 @@ from src.application.common.dtos import NewPurchaseDTO, ProductDTO
 @dataclass(frozen=True)
 class UsePurchaseTokenCMD(Request[list[ProductDTO]]):
     amount: int
+    with_features: list[str] | None = field(default=None)
     clear_content: bool = field(default=False)
 
 
@@ -29,6 +31,7 @@ class UsePurchaseTokenCMDHandler(RequestHandler[UsePurchaseTokenCMD, list[Produc
         token_writer: ITokenWriter,
         token_reader: ITokenReader,
         products_writer: IProductsWriter,
+        features_service: FeaturesService,
     ):
         self._uow = uow
         self._products_reader = products_reader
@@ -37,6 +40,7 @@ class UsePurchaseTokenCMDHandler(RequestHandler[UsePurchaseTokenCMD, list[Produc
         self._token_writer = token_writer
         self._token_reader = token_reader
         self._products_writer = products_writer
+        self._features_service = features_service
 
     async def __call__(self, cmd: UsePurchaseTokenCMD) -> list[ProductDTO]:
         token = self._purchase_token_provider.get_token()
@@ -52,7 +56,11 @@ class UsePurchaseTokenCMDHandler(RequestHandler[UsePurchaseTokenCMD, list[Produc
                 }
             )
 
-        products = await self._products_reader.get_unsold_unreserved_products(token_data.product_type.value, cmd.amount)
+        features_ids = []
+        if cmd.with_features:
+            features_ids = await self._features_service.get_ids_by_codes(token_data.product_type, cmd.with_features)
+
+        products = await self._products_reader.get_unsold_unreserved_products(token_data.product_type.value, cmd.amount, features_ids)
 
         if len(products) != cmd.amount:
             raise ProductOutOfStock(

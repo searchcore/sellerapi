@@ -4,7 +4,7 @@ from src.domain.common.value_objects import ProductTypeIDVO, ProductTypeSchemaID
 
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.db.models import ProductModel, ProductTypeModel
+from src.db.models import ProductModel, ProductTypeModel, ProductFeaturesModel
 
 
 class ProductsWriter(IProductsWriter):
@@ -17,12 +17,26 @@ class ProductsWriter(IProductsWriter):
         await self._session.flush()
         return ProductTypeIDVO(m.id)
 
-    async def add_products(self, schema: ProductTypeSchemaIDVO, products: list[NewProductDTO]) -> None:
-        await self._session.execute(
-            insert(ProductModel),
+    async def add_products(self, schema: ProductTypeSchemaIDVO, products: list[NewProductDTO], features: list[int]) -> None:
+        result = await self._session.execute(
+            insert(ProductModel)
+            .returning(ProductModel.id),
             [
                 {"type": p.product_type_id, "schema": schema.value, "content": p.content}
                 for p
                 in products
             ]
         )
+
+        products_ids = result.scalars().all()
+
+        entries = []
+        for product_id in products_ids:
+            for feature_id in features:
+                entries.append({"product_id": product_id, "feature_id": feature_id})
+
+        if entries:
+            await self._session.execute(
+                insert(ProductFeaturesModel),
+                entries,
+            )

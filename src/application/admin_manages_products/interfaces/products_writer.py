@@ -11,5 +11,5 @@ class IProductsWriter(ABC):
         ...
 
     @abstractmethod
-    async def add_products(self, schema: ProductTypeSchemaIDVO, products: list[NewProductDTO]) -> None:
+    async def add_products(self, schema: ProductTypeSchemaIDVO, products: list[NewProductDTO], features: list[int]) -> None:
         ...

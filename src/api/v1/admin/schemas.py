@@ -12,6 +12,7 @@ class CreatePurchaseTokenRequest(BaseModel):
 class ImportProductsRequest(BaseModel):
     product_type: int
     products: list[dict[str, Any]]
+    with_features: list[str] | None = None
 
 
 class AddProductTypeRequest(BaseModel):

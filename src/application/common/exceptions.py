@@ -23,3 +23,7 @@ class ProductTypeSchemaNotFound(ApplicationLayerException):
 
 class ProductTypeNotFound(ApplicationLayerException):
     code = ErrorCodes.PRODUCT_TYPE_NOT_FOUND
+
+
+class ProductTypeFeatureInvalid(ApplicationLayerException):
+    code = ErrorCodes.PRODUCT_TYPE_FEATURE_INVALID

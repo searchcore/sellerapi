@@ -63,7 +63,8 @@ def req_to_cmd_import_products(req: ImportProductsRequest) -> ImportProductsCMD:
             )
             for p
             in req.products
-        ]
+        ],
+        features=req.with_features,
     )
 
 

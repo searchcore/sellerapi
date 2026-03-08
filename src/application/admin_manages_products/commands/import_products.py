@@ -7,6 +7,7 @@ from src.application.common.dtos import NewProductDTO
 from src.application.common.mediator import MR
 from src.application.common.interfaces import IUoW, ISchemaValidator
 from src.application.common.interfaces.schema_validator import ContentValidationReport
+from src.application.common.services import FeaturesService
 from src.application.common.exceptions import ProductTypeSchemaNotFound, ProductTypeNotFound
 
 from src.application.admin_manages_products.dtos import ImportProductsResultDTO
@@ -21,6 +22,7 @@ class ImportProductsCMD(Request[ImportProductsResultDTO]):
     product_type: ProductTypeIDVO
     products: list[NewProductDTO]
     schema_version: ProductTypeSchemaVersionVO | None = None
+    features: list[str] | None = None
 
 
 @MR.register(ImportProductsCMD)
@@ -32,12 +34,14 @@ class ImportProductsCMDHandler(RequestHandler[ImportProductsCMD, ImportProductsR
         schema_validator: ISchemaValidator,
         schema_reader: ISchemaReader,
         products_reader: IProductsReader,
+        features_service: FeaturesService,
     ):
         self._uow = uow
         self._products_writer = products_writer
         self._products_reader = products_reader
         self._schema_validator = schema_validator
         self._schema_reader = schema_reader
+        self._features_service = features_service
 
     async def __call__(self, cmd: ImportProductsCMD) -> ImportProductsResultDTO:
         if not await self._products_reader.does_product_type_exist(cmd.product_type):
@@ -67,8 +71,12 @@ class ImportProductsCMDHandler(RequestHandler[ImportProductsCMD, ImportProductsR
             if report.product_valid
         ]
 
+        features_ids = []
+        if cmd.features:
+            features_ids = await self._features_service.get_ids_by_codes(cmd.product_type, cmd.features)
+
         if valid_products:
-            await self._products_writer.add_products(product_type_schema.id, valid_products)
+            await self._products_writer.add_products(product_type_schema.id, valid_products, features_ids)
             await self._uow.commit()
         
         logger.info(

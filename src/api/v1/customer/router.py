@@ -51,10 +51,11 @@ async def purchase_products(
     fields: Annotated[list[str] | None, Query()] = None,
     amount: Annotated[int, Query(title="Amount of products to purchase", ge=1, le=500)] = 1,
     clear_content: Annotated[bool, Query()] = False,
+    with_features: Annotated[list[str] | None, Query(title="Features list. Only products with these features will be bought.")] = None,
     purchase_token: PurchaseTokenDTO = Depends(get_purchase_token_ctx),
     mediator: Mediator = Depends(get_mediator),
 ):
-    cmd = UsePurchaseTokenCMD(amount, clear_content=clear_content)
+    cmd = UsePurchaseTokenCMD(amount, clear_content=clear_content, with_features=with_features)
     products = await mediator.send(cmd, context={ScopedPurchaseToken: purchase_token})
 
     resp = dto_to_resp_purchase_products(products)
@@ -71,7 +72,8 @@ async def purchase_products(
 async def get_available_products_count(
     purchase_token: PurchaseTokenDTO = Depends(get_purchase_token_ctx),
     mediator: Mediator = Depends(get_mediator),
+    with_features: Annotated[list[str] | None, Query(title="Features list. Only products with these features will be counted.")] = None,
 ):
-    cmd = GetAvailableProductsCountQR()
+    cmd = GetAvailableProductsCountQR(with_features)
     count = await mediator.send(cmd, context={ScopedPurchaseToken: purchase_token})
     return success(AvailableProductsCountResponse(count=count))

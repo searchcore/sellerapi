@@ -12,6 +12,7 @@ class ErrorCodes(StrEnum):
     PRODUCT_TYPE_SCHEMA_INVALID = "product_type_schema_invalid"
     PRODUCT_TYPE_SCHEMA_NOT_FOUND = "product_type_schema_not_found"
     PRODUCT_TYPE_NOT_FOUND = "product_type_not_found"
+    PRODUCT_TYPE_FEATURE_INVALID = "product_type_feature_invalid"
 
 
 @dataclass(eq=False)

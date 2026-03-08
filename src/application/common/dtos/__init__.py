@@ -4,6 +4,7 @@ from .new_purchase import NewPurchaseDTO
 from .purchase_token_data import PurchaseTokenDataDTO
 from .new_products import NewProductDTO
 from .access_token import AccessTokenBriefDTO
+from .feature import FeatureDTO
 
 
 __all__ = [
@@ -13,4 +14,5 @@ __all__ = [
     "PurchaseTokenDataDTO",
     "NewProductDTO",
     "AccessTokenBriefDTO",
+    "FeatureDTO",
 ]
