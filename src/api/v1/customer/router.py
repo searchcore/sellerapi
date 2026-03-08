@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, Query, status
 from src.core.responses import SuccessResponse, success, create_error_resp
 from src.api.deps import get_purchase_token_ctx, get_mediator
 
+from datetime import datetime
+
 from src.application.common.exceptions import PurchaseTokenNotFound, ProductOutOfStock
 from src.application.customer_buys_products.exceptions import TokenLimitExceeded
 from src.application.common.mediator import Mediator
@@ -51,11 +53,13 @@ async def purchase_products(
     fields: Annotated[list[str] | None, Query()] = None,
     amount: Annotated[int, Query(title="Amount of products to purchase", ge=1, le=500)] = 1,
     clear_content: Annotated[bool, Query()] = False,
+    since: Annotated[datetime | None, Query()] = None,
+    until: Annotated[datetime | None, Query()] = None,
     with_features: Annotated[list[str] | None, Query(title="Features list. Only products with these features will be bought.")] = None,
     purchase_token: PurchaseTokenDTO = Depends(get_purchase_token_ctx),
     mediator: Mediator = Depends(get_mediator),
 ):
-    cmd = UsePurchaseTokenCMD(amount, clear_content=clear_content, with_features=with_features)
+    cmd = UsePurchaseTokenCMD(amount, clear_content=clear_content, with_features=with_features, since=since, until=until)
     products = await mediator.send(cmd, context={ScopedPurchaseToken: purchase_token})
 
     resp = dto_to_resp_purchase_products(products)
@@ -72,8 +76,10 @@ async def purchase_products(
 async def get_available_products_count(
     purchase_token: PurchaseTokenDTO = Depends(get_purchase_token_ctx),
     mediator: Mediator = Depends(get_mediator),
+    since: Annotated[datetime | None, Query()] = None,
+    until: Annotated[datetime | None, Query()] = None,
     with_features: Annotated[list[str] | None, Query(title="Features list. Only products with these features will be counted.")] = None,
 ):
-    cmd = GetAvailableProductsCountQR(with_features)
+    cmd = GetAvailableProductsCountQR(with_features, since, until)
     count = await mediator.send(cmd, context={ScopedPurchaseToken: purchase_token})
     return success(AvailableProductsCountResponse(count=count))

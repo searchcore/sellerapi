@@ -1,5 +1,6 @@
 from src.application.common.request import Request, RequestHandler
 from dataclasses import dataclass, field
+from datetime import datetime
 import logging
 
 from src.application.common.exceptions import ProductOutOfStock
@@ -18,6 +19,8 @@ class UsePurchaseTokenCMD(Request[list[ProductDTO]]):
     amount: int
     with_features: list[str] | None = field(default=None)
     clear_content: bool = field(default=False)
+    since: datetime | None = field(default=None)
+    until: datetime | None = field(default=None)
 
 
 @MR.register(UsePurchaseTokenCMD)
@@ -60,7 +63,7 @@ class UsePurchaseTokenCMDHandler(RequestHandler[UsePurchaseTokenCMD, list[Produc
         if cmd.with_features:
             features_ids = await self._features_service.get_ids_by_codes(token_data.product_type, cmd.with_features)
 
-        products = await self._products_reader.get_unsold_unreserved_products(token_data.product_type.value, cmd.amount, features_ids)
+        products = await self._products_reader.get_unsold_unreserved_products(token_data.product_type.value, cmd.amount, features_ids, cmd.since, cmd.until)
 
         if len(products) != cmd.amount:
             raise ProductOutOfStock(

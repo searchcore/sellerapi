@@ -1,5 +1,6 @@
 from src.application.common.request import Request, RequestHandler
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime
 
 from src.application.common.mediator import MR
 from src.application.common.interfaces import IUoW, IPurchaseTokenProvider
@@ -11,6 +12,8 @@ from src.application.customer_buys_products.interfaces import IProductsReader, I
 @dataclass(frozen=True)
 class GetAvailableProductsCountQR(Request[int]):
     with_features: list[str] | None = None
+    since: datetime | None = field(default=None)
+    until: datetime | None = field(default=None)
 
 
 @MR.register(GetAvailableProductsCountQR)
@@ -37,4 +40,4 @@ class GetAvailableProductsCountQRHandler(RequestHandler[GetAvailableProductsCoun
         if query.with_features:
             feature_ids = await self._features_service.get_ids_by_codes(token_data.product_type, query.with_features)
 
-        return await self._products_reader.get_unsold_unreserved_products_count(token_data.product_type, feature_ids)
+        return await self._products_reader.get_unsold_unreserved_products_count(token_data.product_type, feature_ids, query.since, query.until)

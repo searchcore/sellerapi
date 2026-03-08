@@ -1,5 +1,6 @@
 from src.application.customer_buys_products.interfaces import IProductsReader
 
+from datetime import datetime
 from sqlalchemy import select, exists, or_, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,7 +14,14 @@ class ProductsReader(IProductsReader):
     def __init__(self, session: AsyncSession):
         self._session = session
 
-    async def get_unsold_unreserved_products(self, type: int, amount: int, with_features: list[int]) -> list[ProductDTO]:
+    async def get_unsold_unreserved_products(
+        self, 
+        type: int, 
+        amount: int, 
+        with_features: list[int],
+        since: datetime | None = None,
+        until: datetime | None = None,
+    ) -> list[ProductDTO]:
         stmt = (
             select(ProductModel.id, ProductModel.content)
             .where(
@@ -31,6 +39,16 @@ class ProductsReader(IProductsReader):
                     ProductFeaturesModel.feature_id == feature_id
                 )
             )
+        
+        if since is not None:
+            stmt = stmt.where(
+                ProductModel.created_at >= since
+            )
+
+        if until is not None:
+            stmt = stmt.where(
+                ProductModel.created_at <= until
+            )
 
         stmt = (
             stmt
@@ -43,7 +61,13 @@ class ProductsReader(IProductsReader):
 
         return [ProductDTO(row.id, type, row.content) for row in result.all()]
 
-    async def get_unsold_unreserved_products_count(self, type: ProductTypeIDVO, with_features: list[int]) -> int:
+    async def get_unsold_unreserved_products_count(
+        self,
+        type: ProductTypeIDVO,
+        with_features: list[int],
+        since: datetime | None = None,
+        until: datetime | None = None,
+    ) -> int:
         stmt = (
             select(func.count(ProductModel.id))
             .where(
@@ -60,6 +84,16 @@ class ProductsReader(IProductsReader):
                     ProductFeaturesModel.product_id == ProductModel.id,
                     ProductFeaturesModel.feature_id == feature_id
                 )
+            )
+
+        if since is not None:
+            stmt = stmt.where(
+                ProductModel.created_at >= since
+            )
+
+        if until is not None:
+            stmt = stmt.where(
+                ProductModel.created_at <= until
             )
 
         result = await self._session.scalar(stmt)
