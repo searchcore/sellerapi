@@ -13,6 +13,7 @@ from .schemas import (
     ImportedProductsResponse,
     AddProductTypeRequest,
     CreatedProductTypeResponse,
+    ProductsTypesResponse,
 )
 from .mappers import (
     dto_to_resp_imported_products,
@@ -22,6 +23,8 @@ from .mappers import (
     req_to_cmd_import_products,
     req_to_cmd_add_prod_type,
     vo_to_resp_created_prod_type,
+    query_to_get_product_types,
+    dto_to_resp_product_types,
 )
 
 router = APIRouter()
@@ -90,3 +93,19 @@ async def create_product_type(
     return success(
         vo_to_resp_created_prod_type(result)
     )
+
+
+@router.get(
+    "/products/types",
+    response_model=SuccessResponse[ProductsTypesResponse],
+)
+async def get_active_product_types(
+    offset: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=500)] = 100,
+    mediator: Mediator = Depends(get_mediator),
+    token: AccessTokenBriefDTO = Depends(get_access_token),
+):
+    query = query_to_get_product_types(offset, limit)
+    result = await mediator.send(query)
+
+    return success(dto_to_resp_product_types(result))

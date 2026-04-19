@@ -48,3 +48,20 @@ class CreatedTokenResponse(BaseModel):
 
 class CreatedProductTypeResponse(BaseModel):
     product_type_id: int
+
+
+class CurrentSchemaResponse(BaseModel):
+    id: int
+    version: int
+    product_schema: dict[str, Any]
+
+
+class ProductTypeResponse(BaseModel):
+    id: int
+    name: str
+    current_schema: CurrentSchemaResponse
+
+
+class ProductsTypesResponse(BaseModel):
+    products_types: list[ProductTypeResponse]
+    total: int
