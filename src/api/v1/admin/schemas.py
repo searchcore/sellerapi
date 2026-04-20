@@ -65,3 +65,19 @@ class ProductTypeResponse(BaseModel):
 class ProductsTypesResponse(BaseModel):
     products_types: list[ProductTypeResponse]
     total: int
+
+
+class FindProductsRequest(BaseModel):
+    product_type: int
+    contains: dict[str, Any] | None = None
+
+
+class FoundProductResponse(BaseModel):
+    id: int
+    product_type: int
+    data: dict[str, Any]
+
+
+class FindProductsResponse(BaseModel):
+    result: list[FoundProductResponse]
+

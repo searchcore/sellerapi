@@ -1,6 +1,6 @@
 from src.application.admin_manages_purchase_tokens.commands import CreatePurchaseTokenCMD, IncreaseAvailableToBuyCMD
 from src.application.admin_manages_products.commands import ImportProductsCMD, AddProductTypeCMD
-from src.application.admin_manages_products.queries import GetProductsTypesQR
+from src.application.admin_manages_products.queries import GetProductsTypesQR, FindProductsQR
 
 from src.domain.common.value_objects import (
     ProductTypeIDVO,
@@ -9,7 +9,7 @@ from src.domain.common.value_objects import (
 
 from src.application.common.dtos import NewProductDTO
 from src.application.admin_manages_purchase_tokens.dtos import CreatedTokenDTO
-from src.application.admin_manages_products.dtos import ImportProductsResultDTO, ProductsTypesDTO
+from src.application.admin_manages_products.dtos import ImportProductsResultDTO, ProductsTypesDTO, FindProductsResultDTO
 
 from .schemas import (
     ImportProductsRequest,
@@ -24,6 +24,9 @@ from .schemas import (
     ProductsTypesResponse,
     ProductTypeResponse,
     CurrentSchemaResponse,
+    FindProductsRequest,
+    FindProductsResponse,
+    FoundProductResponse,
 )
 
 
@@ -87,6 +90,13 @@ def query_to_get_product_types(offset: int, limit: int) -> GetProductsTypesQR:
     return GetProductsTypesQR(offset=offset, limit=limit)
 
 
+def req_to_query_find_products(req: FindProductsRequest) -> FindProductsQR:
+    return FindProductsQR(
+        product_type=ProductTypeIDVO(req.product_type),
+        contains=req.contains,
+    )
+
+
 def dto_to_resp_product_types(dto: ProductsTypesDTO) -> ProductsTypesResponse:
     return ProductsTypesResponse(
         products_types=[
@@ -102,4 +112,17 @@ def dto_to_resp_product_types(dto: ProductsTypesDTO) -> ProductsTypesResponse:
             for product_type in dto.products_types
         ],
         total=dto.total,
+    )
+
+
+def dto_to_resp_find_products(dto: FindProductsResultDTO) -> FindProductsResponse:
+    return FindProductsResponse(
+        result=[
+            FoundProductResponse(
+                id=product.id,
+                product_type=product.type,
+                data=product.content,
+            )
+            for product in dto.result
+        ]
     )

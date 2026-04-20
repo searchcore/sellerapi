@@ -1,12 +1,16 @@
+from typing import Any
+
 from src.application.admin_manages_products.interfaces import IProductsReader
 from src.application.admin_manages_products.dtos import ProductTypeWithSchemaDTO, ProductTypeSchemaDTO
+from src.application.common.dtos import ProductDTO
 
 from src.domain.common.value_objects import ProductTypeIDVO, ProductTypeSchemaIDVO, ProductTypeSchemaVersionVO, ProductTypeSchemaVO
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, cast
+from sqlalchemy.dialects.postgresql import JSONB
 
-from src.db.models import ProductTypeModel, ProductSchemaVersionModel
+from src.db.models import ProductTypeModel, ProductSchemaVersionModel, ProductModel
 
 
 class ProductsReader(IProductsReader):
@@ -75,3 +79,41 @@ class ProductsReader(IProductsReader):
 
         result = await self._session.scalar(stmt)
         return result or 0
+
+    async def find_products(
+        self,
+        product_type: ProductTypeIDVO,
+        contains: dict[str, Any] | None = None,
+    ) -> list[ProductDTO]:
+        stmt = (
+            select(
+                ProductModel.id,
+                ProductModel.type,
+                ProductModel.content,
+            )
+            .where(*self._build_find_products_filters(product_type, contains))
+            .order_by(ProductModel.id.asc())
+        )
+
+        result = await self._session.execute(stmt)
+
+        return [
+            ProductDTO(
+                id=row.id,
+                type=row.type,
+                content=row.content,
+            )
+            for row in result.all()
+        ]
+
+    def _build_find_products_filters(
+        self,
+        product_type: ProductTypeIDVO,
+        contains: dict[str, Any] | None,
+    ) -> list[Any]:
+        filters: list[Any] = [ProductModel.type == product_type.value]
+
+        if contains is not None:
+            filters.append(ProductModel.content.op("@>")(cast(contains, JSONB)))
+
+        return filters

@@ -14,6 +14,8 @@ from .schemas import (
     AddProductTypeRequest,
     CreatedProductTypeResponse,
     ProductsTypesResponse,
+    FindProductsRequest,
+    FindProductsResponse,
 )
 from .mappers import (
     dto_to_resp_imported_products,
@@ -25,6 +27,8 @@ from .mappers import (
     vo_to_resp_created_prod_type,
     query_to_get_product_types,
     dto_to_resp_product_types,
+    req_to_query_find_products,
+    dto_to_resp_find_products,
 )
 
 router = APIRouter()
@@ -109,3 +113,18 @@ async def get_active_product_types(
     result = await mediator.send(query)
 
     return success(dto_to_resp_product_types(result))
+
+
+@router.post(
+    "/products/find",
+    response_model=SuccessResponse[FindProductsResponse],
+)
+async def find_products(
+    body: FindProductsRequest,
+    mediator: Mediator = Depends(get_mediator),
+    token: AccessTokenBriefDTO = Depends(get_access_token),
+):
+    query = req_to_query_find_products(body)
+    result = await mediator.send(query)
+
+    return success(dto_to_resp_find_products(result))
